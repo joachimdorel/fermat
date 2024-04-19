@@ -66,9 +66,7 @@ const Board: React.FC = () => {
   };
 
   const numberClicked = (nmb: NumberSelector, index: number) => {
-    if (index < selectNumbers.length) {      
-      selectedNumbers[index] = { val: nmb.val, used: true };
-    }
+    selectedNumbers[index] = { val: nmb.val, used: true };
     setSelectedNumbers(selectedNumbers);
 
     if (!number1) {
@@ -104,7 +102,17 @@ const Board: React.FC = () => {
   };
 
   const clearSelection = () => {
+    const selectedNumbersUpdated = selectedNumbers.map((sn: NumberSelector) => {
+      if ((sn.val === number1 || sn.val === number2) && sn.used === true) {
+        return { val: sn.val, used: false };
+      }
+      return sn;
+    });
 
+    setSelectedNumbers(selectedNumbersUpdated);
+    setNumber1(undefined);
+    setNumber2(undefined);
+    setOperator(undefined);
   };
 
   useEffect(() => {
@@ -121,7 +129,6 @@ const Board: React.FC = () => {
 
   useEffect(() => {
     const solvable = solver(selectedNumbers.map((ns: NumberSelector) => ns.val ), targetNumber, false);
-    console.log(solvable);
   }, [targetNumber]); // cet effet s'exécute à chaque fois que targetNumber est mis à jour
 
   return (
@@ -155,23 +162,28 @@ const Board: React.FC = () => {
         }
       </div>
 
-      <div>
-        {number1} {operator} {number2} 
-        <button onClick={() => clearSelection()} />
+      <div className='flex flex-row justify-between min-w-44'>
+        <div></div> 
+        <div>{number1} {operator} {number2}</div>
+        <div className='text-orange-600'>
+          {(number1 || operator || number2) && 
+            <button onClick={() => clearSelection()}>clear</button>
+          }
+        </div>
       </div>
 
       <div>
         {operations.map((operation: Operation, index: number) => {
           return (
-            <div key={index} className='flex flex-row justify-between min-w-44'>
-              <div>
-                {operation.num1} {operation.operator} {operation.num2} = {operation.result}
-              </div>
+            <div key={index} className='grid grid-cols-4 gap-2'>
+              <div>{operation.num1} {operation.operator} {operation.num2}</div>
+              <div> = </div>
+              <div>{operation.result}</div>
 
               <div>
                 {
                   (index  === operations.length - 1) ? 
-                    <button className='cancelButton ml-2' onClick={() => removeLastOperation()}>x</button> 
+                    <button className='ml-2 text-orange-600' onClick={() => removeLastOperation()}>x</button> 
                   : 
                     ''
                 }
