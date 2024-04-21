@@ -59,7 +59,7 @@ const selectNumbers = (possibleNumbers: number[], amount: number): NumberSelecto
 
   selectedNumbers = selectedNumbers.sort((a, b) => a - b); // sort the array ascending
   const updatedNumbers = selectedNumbers.map((n: number): NumberSelector => { 
-    return {val: n, used: false} 
+    return { val: n, used: false, initial: true } 
   });
 
   return(updatedNumbers);
@@ -77,7 +77,7 @@ const realizeCalculation = (number1?: number, number2?: number, operator?: strin
       case '-':
         newNumber = number1 - number2;
         break;
-      case '*':
+      case 'x':
         newNumber = number1 * number2;
         break;
       case '/':
