@@ -101,6 +101,17 @@ const Board: React.FC = () => {
     setSelectedNumbers(selectedNumbersUpdated);
   };
 
+  const newGame = () => {
+    setSelectedNumbers(selectNumbers(numbersPossible, 6));
+    setTargetNumber(Math.floor(100 + Math.random() * 900));
+
+    setOperations([]);
+    setNumberFound(false);
+    setNumber1(undefined);
+    setNumber2(undefined);
+    setOperator(undefined);
+  };
+
   const clearSelection = () => {
     const selectedNumbersUpdated = selectedNumbers.map((sn: NumberSelector) => {
       if ((sn.val === number1 || sn.val === number2) && sn.used === true) {
@@ -134,7 +145,7 @@ const Board: React.FC = () => {
   return (
     <div className='flex items-center flex-col gap-4 '>
       
-      <div>{targetNumber}</div>
+      <div className='p-2'>{targetNumber}</div>
       <div className='flex inline-flex gap-4'>
         {selectedNumbers.map((nmb: NumberSelector, index: number) => {
           return (
@@ -145,15 +156,20 @@ const Board: React.FC = () => {
         })}
       </div>
       <div className='flex inline-flex gap-4'>
-        <div className='gameButton' onClick={() => operatorClicked('+')}>+</div>
-        <div className='gameButton' onClick={() => operatorClicked('-')}>-</div>
-        <div className='gameButton' onClick={() => operatorClicked('*')}>*</div>
-        <div className='gameButton' onClick={() => operatorClicked('/')}>/</div>
+        <div className='card active' onClick={() => operatorClicked('+')}>+</div>
+        <div className='card active' onClick={() => operatorClicked('-')}>-</div>
+        <div className='card active' onClick={() => operatorClicked('*')}>*</div>
+        <div className='card active' onClick={() => operatorClicked('/')}>/</div>
       </div>
 
-      <div>
+      <div className='text-yellow-800'>
         {numberFound && 
-          'Number found ✅'
+          <div>
+            <p>Number found 🎉</p>
+            <div>
+              <button className='border border-solid border-yellow-900 p-2 m-2 rounded-md hover:bg-yellow-900 hover:text-white hover:border-white' onClick={() => newGame()}>New game</button>
+            </div>
+          </div>
         }
       </div>
       <div>
@@ -162,28 +178,48 @@ const Board: React.FC = () => {
         }
       </div>
 
-      <div className='flex flex-row justify-between min-w-44'>
-        <div></div> 
-        <div>{number1} {operator} {number2}</div>
-        <div className='text-orange-600'>
-          {(number1 || operator || number2) && 
-            <button onClick={() => clearSelection()}>clear</button>
-          }
+      {(number1 || operator || number2) && 
+        <div className='flex inline-flex gap-2'>
+          <div></div> 
+          <div className='flex flex-row gap-4'>
+            {(number1) && 
+              <div className='card disabled'>
+                {number1}
+              </div>
+            }
+            {(operator) && 
+              <div className='card disabled'>
+                {operator}
+              </div>
+            }
+            {(number2) && 
+              <div className='card disabled'>
+                {number2}
+              </div>
+            }
+          </div>
+          <div className='cancel'>
+            <button className='' onClick={() => clearSelection()}>clear</button>
+          </div>
         </div>
-      </div>
+      }
 
-      <div>
+      <div className=''>
         {operations.map((operation: Operation, index: number) => {
           return (
-            <div key={index} className='grid grid-cols-4 gap-2'>
-              <div>{operation.num1} {operation.operator} {operation.num2}</div>
-              <div> = </div>
-              <div>{operation.result}</div>
+            <div key={index} className='grid grid-cols-2'>
+              <div className='grid grid-cols-5 gap-2'>
+                <div className='card disabled mt-2'>{operation.num1}</div>
+                <div className='card disabled mt-2'>{operation.operator}</div>
+                <div className='card disabled mt-2'>{operation.num2}</div>
+                <div className='card disabled mt-2'> = </div>
+                <div className='card disabled mt-2'>{operation.result}</div>
+              </div>
 
               <div>
                 {
                   (index  === operations.length - 1) ? 
-                    <button className='ml-2 text-orange-600' onClick={() => removeLastOperation()}>x</button> 
+                    <button className='mt-2 text-orange-600 cancel' onClick={() => removeLastOperation()}>x</button> 
                   : 
                     ''
                 }

@@ -10,7 +10,7 @@ const NumberCard: React.FC<NumberCardProps> = ({n, used, onNumberClick}) => {
   
   return (
     <div>
-      <button className={!used ? 'gameButton': 'gameButtonDisabled' } onClick={onNumberClick} disabled={used} >
+      <button className={'card ' + (!used ? 'active': 'disabled') } onClick={onNumberClick} disabled={used} >
         {n}
       </button>
     </div>

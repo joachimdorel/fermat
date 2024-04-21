@@ -8,15 +8,19 @@
 }
 
 @layer components {
-  .gameButton {
-    @apply border border-solid border-black rounded-sm p-2 hover:cursor-pointer  hover:bg-gray-200 active:bg-gray-600 active:text-slate-100 select-none
-  }  
-
-  .gameButtonDisabled {
-    @apply border-solid border-gray-200 bg-gray-200 rounded-sm p-2 select-none text-slate-500	
+  .card {
+    @apply border-solid rounded-sm p-2
   }
 
-  .cancelButton {
-    @apply border border-solid border-black rounded-sm py-0 px-1 hover:cursor-pointer hover:bg-gray-200 active:bg-gray-600 active:text-slate-100 select-none
+  .active {
+    @apply border border-black hover:cursor-pointer hover:bg-gray-100 active:bg-gray-100 active:text-slate-100 select-none
+  }  
+
+  .disabled {
+    @apply border border-gray-200 bg-gray-200 rounded-sm text-slate-500	select-none
+  }
+
+  .cancel {
+    @apply border border-orange-500 bg-orange-100 rounded-sm p-2  hover:bg-orange-300 hover:text-white
   }
 }
