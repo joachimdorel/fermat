@@ -1,9 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import NumberCard from './numberCard';
 import NumberSelector from '../types/numberSelector';
 import { Operation } from '../types/operation';
-import { selectNumbers, solver } from '../Services/numberServices';
+import { realizeCalculation, selectNumbers, /* solver */ } from '../Services/numberServices';
 
 const Board: React.FC = () => {
   const [error, setError] = useState<string>();
@@ -17,30 +17,15 @@ const Board: React.FC = () => {
 
   let numbersPossible = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
 
-  const calculateOperation = (number1?: number, number2?: number, operator?: string): number => {
-    let newNumber: number = 0;
+  const newGame = () => {
+    setSelectedNumbers(selectNumbers(numbersPossible, 6));
+    setTargetNumber(Math.floor(100 + Math.random() * 900));
 
-    if (number1 && number2 && operator) {
-      switch (operator) {
-        case '+':
-          newNumber = number1 + number2;
-          break;
-        case '-':
-          newNumber = number1 - number2;
-          break;
-        case '*':
-          newNumber = number1 * number2;
-          break;
-        case '/':
-          newNumber = number1 / number2;
-          break;
-        default:
-          setError('An error happened while calculating...')
-          break;
-      }
-    }
-
-    return newNumber;
+    setOperations([]);
+    setNumberFound(false);
+    setNumber1(undefined);
+    setNumber2(undefined);
+    setOperator(undefined);
   };
 
   const updateNumbers = () => {
@@ -49,7 +34,7 @@ const Board: React.FC = () => {
       return;
     }
 
-    let newNumber = calculateOperation(number1, number2, operator);
+    let newNumber = realizeCalculation(number1, number2, operator);
     operations.push({num1: number1, num2: number2, operator: operator, result: newNumber});
     setOperations(operations);
     setNumber1(undefined);
@@ -101,17 +86,6 @@ const Board: React.FC = () => {
     setSelectedNumbers(selectedNumbersUpdated);
   };
 
-  const newGame = () => {
-    setSelectedNumbers(selectNumbers(numbersPossible, 6));
-    setTargetNumber(Math.floor(100 + Math.random() * 900));
-
-    setOperations([]);
-    setNumberFound(false);
-    setNumber1(undefined);
-    setNumber2(undefined);
-    setOperator(undefined);
-  };
-
   const clearSelection = () => {
     const selectedNumbersUpdated = selectedNumbers.map((sn: NumberSelector) => {
       if ((sn.val === number1 || sn.val === number2) && sn.used === true) {
@@ -126,10 +100,15 @@ const Board: React.FC = () => {
     setOperator(undefined);
   };
 
+  // use of a memo to keep the selectedNumbers in memort
+  const selectedNumbersMemo = useMemo(() => {
+    return selectNumbers([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100], 6);
+  }, []); 
+
   useEffect(() => {
-    setSelectedNumbers(selectNumbers(numbersPossible, 6));
+    setSelectedNumbers(selectedNumbersMemo);
     setTargetNumber(Math.floor(100 + Math.random() * 900));
-  }, []); // le tableau vide indique que ce useEffect ne sera appelé qu'une seule fois à la montée du composant
+  }, [selectedNumbersMemo]); // le tableau vide indique que ce useEffect ne sera appelé qu'une seule fois à la montée du composant - la fonction peut être appelée sans le tableau vide
 
   // when an operation is completely written, it executes immediatly
   useEffect(() => {
@@ -139,7 +118,7 @@ const Board: React.FC = () => {
   }, [number1, number2, operator]);
 
   useEffect(() => {
-    const solvable = solver(selectedNumbers.map((ns: NumberSelector) => ns.val ), targetNumber, false);
+    // const solvable = solver(selectedNumbers.map((ns: NumberSelector) => ns.val ), targetNumber, false);
   }, [targetNumber]); // cet effet s'exécute à chaque fois que targetNumber est mis à jour
 
   return (
@@ -162,71 +141,71 @@ const Board: React.FC = () => {
         <div className='card active' onClick={() => operatorClicked('/')}>/</div>
       </div>
 
-      <div className='text-yellow-800'>
-        {numberFound && 
-          <div>
+      {numberFound && 
+        <div className='flex flex-row'>
+          <div className='p-2 m-2'>
             <p>Number found 🎉</p>
-            <div>
-              <button className='border border-solid border-yellow-900 p-2 m-2 rounded-md hover:bg-yellow-900 hover:text-white hover:border-white' onClick={() => newGame()}>New game</button>
-            </div>
           </div>
-        }
-      </div>
+          <div>
+            <button className='border border-solid border-green-900 p-2 m-2 rounded-sm hover:bg-green-900 hover:text-white hover:border-white' onClick={() => newGame()}>New game</button>
+          </div>
+        </div>
+      }
       <div>
         {error && 
           <p>{error}</p>
         }
       </div>
 
-      {(number1 || operator || number2) && 
-        <div className='flex inline-flex gap-2'>
-          <div></div> 
-          <div className='flex flex-row gap-4'>
-            {(number1) && 
-              <div className='card disabled'>
-                {number1}
-              </div>
-            }
-            {(operator) && 
-              <div className='card disabled'>
-                {operator}
-              </div>
-            }
-            {(number2) && 
-              <div className='card disabled'>
-                {number2}
-              </div>
-            }
-          </div>
-          <div className='cancel'>
-            <button className='' onClick={() => clearSelection()}>clear</button>
-          </div>
-        </div>
-      }
-
-      <div className=''>
-        {operations.map((operation: Operation, index: number) => {
-          return (
-            <div key={index} className='grid grid-cols-2'>
-              <div className='grid grid-cols-5 gap-2'>
-                <div className='card disabled mt-2'>{operation.num1}</div>
-                <div className='card disabled mt-2'>{operation.operator}</div>
-                <div className='card disabled mt-2'>{operation.num2}</div>
-                <div className='card disabled mt-2'> = </div>
-                <div className='card disabled mt-2'>{operation.result}</div>
-              </div>
-
-              <div>
-                {
-                  (index  === operations.length - 1) ? 
-                    <button className='mt-2 text-orange-600 cancel' onClick={() => removeLastOperation()}>x</button> 
-                  : 
-                    ''
-                }
-              </div>
+      <div className={'grid grid-rows-' + (operations.length + 2)}> 
+        {(number1 || operator || number2) && 
+          <div className='grid grid-cols-5 gap-4'>
+            <div className='grid col-span-4 grid-cols-5 gap-2 mt-2'>
+              {(number1) && 
+                <div className='card disabled'>
+                  {number1}
+                </div>
+              }
+              {(operator) && 
+                <div className='card disabled'>
+                  {operator}
+                </div>
+              }
+              {(number2) && 
+                <div className='card disabled'>
+                  {number2}
+                </div>
+              }
             </div>
-          )
-        })}
+
+            <div className='col-span-1 h-auto mt-2'>
+              <button className='cancel' onClick={() => clearSelection()}>clear</button>
+            </div>
+          </div>
+        }
+
+        <div className='mt-2 border-t border-gray-200'>
+          {operations.map((operation: Operation, index: number) => {
+            return ( 
+              <div className='grid grid-cols-5 gap-4' key={index}>
+                  <div className='col-span-4'>
+                    <div key={index} className='grid grid-cols-5 gap-2 mt-2'>
+                      <div className='card disabled '>{operation.num1}</div>
+                      <div className='card disabled '>{operation.operator}</div>
+                      <div className='card disabled '>{operation.num2}</div>
+                      <div className='card disabled '> = </div>
+                      <div className='card disabled '>{operation.result}</div>
+                  </div>
+                </div>
+                <div className='col-span-1 h-auto mt-2 justify-self-end'>
+                  {((index === operations.length - 1) && !numberFound) && 
+                    <button className='cancel' onClick={() => removeLastOperation()}>x</button> 
+                  }
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   );

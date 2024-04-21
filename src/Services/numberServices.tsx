@@ -65,4 +65,33 @@ const selectNumbers = (possibleNumbers: number[], amount: number): NumberSelecto
   return(updatedNumbers);
 };
 
-export { solver, selectNumbers };
+// realize an operation for two numbers and an operator indicated with a string
+const realizeCalculation = (number1?: number, number2?: number, operator?: string): number => {
+  let newNumber: number = 0;
+
+  if (number1 && number2 && operator) {
+    switch (operator) {
+      case '+':
+        newNumber = number1 + number2;
+        break;
+      case '-':
+        newNumber = number1 - number2;
+        break;
+      case '*':
+        newNumber = number1 * number2;
+        break;
+      case '/':
+        newNumber = number1 / number2;
+        break;
+      default:
+        // TODO manage errors
+        // setError('An error happened while calculating...')
+        break;
+    }
+  }
+
+  return newNumber;
+};
+
+
+export { solver, selectNumbers, realizeCalculation };

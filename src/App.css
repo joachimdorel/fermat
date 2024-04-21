@@ -21,6 +21,6 @@
   }
 
   .cancel {
-    @apply border border-orange-500 bg-orange-100 rounded-sm p-2  hover:bg-orange-300 hover:text-white
+    @apply border border-orange-100 bg-orange-100 rounded-sm p-2 hover:bg-orange-300 hover:text-white
   }
 }
